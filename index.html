@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RandomDirect Redirect</title>
+  <title>RandomDirect Redirect Hub</title>
   <style>
+    /* ---------- Basic Styling ---------- */
     body {
       font-family: 'Inter', sans-serif;
       background: #f4f4f9;
@@ -15,27 +16,32 @@
       margin: 0;
       color: #333;
     }
+
     .container {
       background: #fff;
       padding: 2rem 3rem;
       border-radius: 12px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.1);
       text-align: center;
-      max-width: 400px;
+      max-width: 450px;
       width: 90%;
     }
+
     h1 {
       font-size: 1.5rem;
       margin-bottom: 1rem;
     }
+
     p {
       margin: 0.5rem 0;
       font-size: 1rem;
     }
+
     .error {
       color: #e74c3c;
       font-weight: bold;
     }
+
     a {
       display: inline-block;
       margin-top: 1rem;
@@ -46,8 +52,26 @@
       border-radius: 8px;
       transition: 0.2s;
     }
+
     a:hover {
       background: #2980b9;
+    }
+
+    .spinner {
+      margin-top: 1rem;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      animation: spin 1s linear infinite;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -55,19 +79,38 @@
   <div class="container">
     <h1>Redirecting...</h1>
     <p id="message">Please wait</p>
+    <div class="spinner"></div>
   </div>
 
   <script>
-    // Get 'site' from query parameter
+    // ---------------- Flexible Query Redirect ----------------
     const params = new URLSearchParams(window.location.search);
-    const sitename = params.get('site');
+
+    // All supported query keys
+    const keys = [
+      'site','sites','redirect','redirection','redirects',
+      'point','pull','query','goto','go','link','linkto',
+      'url','target','to','launch','open'
+    ];
+
+    // Find the first query parameter that exists
+    let sitename = null;
+    for (const key of keys) {
+      if (params.get(key)) {
+        sitename = params.get(key);
+        break;
+      }
+    }
+
     const messageEl = document.getElementById('message');
 
+    // Fetch sites.json and redirect
     fetch('sites.json')
       .then(res => res.json())
       .then(data => {
         if (sitename && data[sitename]) {
           messageEl.textContent = `Redirecting to ${sitename}...`;
+          // Redirect to the URL from sites.json
           window.location.href = data[sitename];
         } else {
           messageEl.innerHTML = `<span class="error">Unknown redirect: ${sitename || 'none'}</span><br>
