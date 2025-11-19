@@ -58,10 +58,9 @@
   </div>
 
   <script>
-    // Get sitename from URL
-    const pathParts = window.location.pathname.split('/');
-    const sitename = pathParts[pathParts.length - 1] || null;
-
+    // Get 'site' from query parameter
+    const params = new URLSearchParams(window.location.search);
+    const sitename = params.get('site');
     const messageEl = document.getElementById('message');
 
     fetch('sites.json')
@@ -71,7 +70,7 @@
           messageEl.textContent = `Redirecting to ${sitename}...`;
           window.location.href = data[sitename];
         } else {
-          messageEl.innerHTML = `<span class="error">Unknown redirect: ${sitename}</span><br>
+          messageEl.innerHTML = `<span class="error">Unknown redirect: ${sitename || 'none'}</span><br>
           <a href="/">Go Home</a>`;
         }
       })
