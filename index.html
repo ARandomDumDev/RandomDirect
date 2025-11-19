@@ -1,27 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Redirecting...</title>
-<script>
-async function go() {
-  const parts = window.location.pathname.split("/").filter(p => p.length > 0);
-  const name = parts[parts.length - 1]; // last folder is the sitename
-  
-  try {
-    const res = await fetch("sites.json");
-    const data = await res.json();
-
-    if (data[name]) {
-      window.location.href = data[name];
-    } else {
-      document.body.innerHTML = "Unknown redirect: " + name;
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RandomDirect Redirect</title>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: #333;
     }
-  } catch (e) {
-    document.body.innerHTML = "Failed to load redirect list.";
-  }
-}
+    .container {
+      background: #fff;
+      padding: 2rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      margin: 0.5rem 0;
+      font-size: 1rem;
+    }
+    .error {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+    a {
+      display: inline-block;
+      margin-top: 1rem;
+      text-decoration: none;
+      color: #fff;
+      background: #3498db;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: 0.2s;
+    }
+    a:hover {
+      background: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Redirecting...</h1>
+    <p id="message">Please wait</p>
+  </div>
 
-go();
-</script>
+  <script>
+    // Get sitename from URL
+    const pathParts = window.location.pathname.split('/');
+    const sitename = pathParts[pathParts.length - 1] || null;
 
+    const messageEl = document.getElementById('message');
+
+    fetch('sites.json')
+      .then(res => res.json())
+      .then(data => {
+        if (sitename && data[sitename]) {
+          messageEl.textContent = `Redirecting to ${sitename}...`;
+          window.location.href = data[sitename];
+        } else {
+          messageEl.innerHTML = `<span class="error">Unknown redirect: ${sitename}</span><br>
+          <a href="/">Go Home</a>`;
+        }
+      })
+      .catch(err => {
+        messageEl.innerHTML = `<span class="error">Failed to load sites.json</span>`;
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
