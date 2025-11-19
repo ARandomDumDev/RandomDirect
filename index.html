@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecting...</title>
+  <script>
+    async function go() {
+      const parts = window.location.pathname.split("/"); 
+      const name = parts[parts.length - 2];
+      try {
+        const res = await fetch("sites.json");
+        const data = await res.json();
+
+        if (data[name]) {
+          window.location.href = data[name];
+        } else {
+          document.body.innerHTML = "Unknown redirect: " + name;
+        }
+      } catch (e) {
+        document.body.innerHTML = "Failed to load redirect list.";
+      }
+    }
+
+    go();
+  </script>
+</head>
+<body>
+  Redirecting…
+</body>
+</html>
