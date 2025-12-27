@@ -105,7 +105,7 @@
     const messageEl = document.getElementById('message');
 
     // Fetch sites.json and redirect
-    fetch('sites.json')
+    fetch('https://raw.githubusercontent.com/ARandomDumDev/RandomDirect/refs/heads/main/sites.json')
       .then(res => res.json())
       .then(data => {
         if (sitename && data[sitename]) {
