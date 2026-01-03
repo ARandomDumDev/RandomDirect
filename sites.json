@@ -1,5 +1,5 @@
 {
   "ExperienceInstall": "itms-services://?action=download-manifest&url=https://loadly.io/app/plist/ae037f3e52ccb7706b6c120ea6",
-  "test": "https://youtube.com/"
+  "test": "https://youtube.com/",
   "ExperienceLane": "https://randomaticpages.my.canva.site/install/"
 }
