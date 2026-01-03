@@ -1,126 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RandomDirect Redirect Hub</title>
-  <style>
-    /* ---------- Basic Styling ---------- */
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f4f4f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      color: #333;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Direct</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .container {
-      background: #fff;
-      padding: 2rem 3rem;
-      border-radius: 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-      text-align: center;
-      max-width: 450px;
-      width: 90%;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-    h1 {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
 
-    p {
-      margin: 0.5rem 0;
-      font-size: 1rem;
-    }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
 
-    .error {
-      color: #e74c3c;
-      font-weight: bold;
-    }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
 
-    a {
-      display: inline-block;
-      margin-top: 1rem;
-      text-decoration: none;
-      color: #fff;
-      background: #3498db;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      transition: 0.2s;
-    }
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 15px;
+            width: 100%;
+        }
 
-    a:hover {
-      background: #2980b9;
-    }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
 
-    .spinner {
-      margin-top: 1rem;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3498db;
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      animation: spin 1s linear infinite;
-      margin-left: auto;
-      margin-right: auto;
-    }
+        .button:active {
+            transform: translateY(0);
+        }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
+        .loading {
+            display: none;
+            color: #667eea;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .error {
+            color: #e74c3c;
+            margin-top: 20px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .button-container {
+            margin-bottom: 20px;
+        }
+
+        .info {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Redirecting...</h1>
-    <p id="message">Please wait</p>
-    <div class="spinner"></div>
-  </div>
+    <div class="container">
+        <h1>🎲 Random Direct</h1>
+        <p class="subtitle">Get sent to a random site!</p>
+        <div class="button-container">
+            <button class="button" onclick="goToRandomSite()">Take me somewhere random!</button>
+        </div>
+        <div class="loading" id="loading">Loading...</div>
+        <div class="error" id="error"></div>
+        <p class="info">Click the button to be directed to a random site from our collection.</p>
+    </div>
 
-  <script>
-    // ---------------- Flexible Query Redirect ----------------
-    const params = new URLSearchParams(window.location.search);
+    <script>
+        async function goToRandomSite() {
+            const loadingElement = document.getElementById('loading');
+            const errorElement = document.getElementById('error');
+            const button = document.querySelector('.button');
 
-    // All supported query keys
-    const keys = [
-      'site','sites','redirect','redirection','redirects',
-      'point','pull','query','goto','go','link','linkto',
-      'url','target','to','launch','open'
-    ];
+            loadingElement.style.display = 'block';
+            errorElement.style.display = 'none';
+            button.disabled = true;
 
-    // Find the first query parameter that exists
-    let sitename = null;
-    for (const key of keys) {
-      if (params.get(key)) {
-        sitename = params.get(key);
-        break;
-      }
-    }
+            try {
+                const response = await fetch('./sites.json');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch sites');
+                }
 
-    const messageEl = document.getElementById('message');
+                const data = await response.json();
 
-    // Fetch sites.json and redirect
-    fetch('https://raw.githubusercontent.com/ARandomDumDev/RandomDirect/refs/heads/main/sites.json')
-      .then(res => res.json())
-      .then(data => {
-        if (sitename && data[sitename]) {
-          messageEl.textContent = `Redirecting to ${sitename}...`;
-          // Redirect to the URL from sites.json
-          window.location.href = data[sitename];
-        } else {
-          messageEl.innerHTML = `<span class="error">Unknown redirect: ${sitename || 'none'}</span><br>
-          <a href="/">Go Home</a>`;
+                if (!Array.isArray(data.sites) || data.sites.length === 0) {
+                    throw new Error('No sites available');
+                }
+
+                const randomIndex = Math.floor(Math.random() * data.sites.length);
+                const randomSite = data.sites[randomIndex];
+
+                window.location.href = randomSite.url;
+            } catch (error) {
+                errorElement.textContent = 'Error: ' + error.message;
+                errorElement.style.display = 'block';
+                console.error('Error:', error);
+            } finally {
+                loadingElement.style.display = 'none';
+                button.disabled = false;
+            }
         }
-      })
-      .catch(err => {
-        messageEl.innerHTML = `<span class="error">Failed to load sites.json</span>`;
-        console.error(err);
-      });
-  </script>
+    </script>
 </body>
 </html>
