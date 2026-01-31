@@ -48,13 +48,105 @@
             color: #999;
             margin-top: 20px;
         }
+
+        .status {
+            margin-top: 18px;
+            font-size: 0.95em;
+            color: #555;
+            word-break: break-word;
+        }
+
+        .error {
+            color: #b00020;
+        }
+
+        .loading {
+            color: #0b77ff;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="app">
         <h1>🎲 Random Direct</h1>
         <p class="subtitle">Get a private query for this to work.</p>
         <p class="info">A private query is required to use this service.</p>
+
+        <div class="status" id="status" aria-live="polite"></div>
     </div>
+
+    <script>
+    (function () {
+        const statusEl = document.getElementById('status');
+        const paramNames = ['site', 'sites', 'website', 'websites'];
+
+        function setStatus(text, cls) {
+            statusEl.textContent = text;
+            statusEl.className = 'status' + (cls ? ' ' + cls : '');
+        }
+
+        // Find first matching query parameter (in the order specified)
+        const params = new URLSearchParams(window.location.search);
+        let key = null;
+        for (const name of paramNames) {
+            if (params.has(name)) {
+                key = params.get(name);
+                if (key !== null && key !== '') break;
+                key = null;
+            }
+        }
+
+        if (!key) {
+            setStatus('No site query found. Use ?site=KEY (or ?sites=, ?website=, ?websites=).', 'error');
+            return;
+        }
+
+        // sanitize key by trimming whitespace
+        key = key.trim();
+
+        setStatus('Looking up site...', 'loading');
+
+        // Fetch sites.json from the same origin (adjust path if your file lives somewhere else)
+        fetch('sites.json', { cache: 'no-store' })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch configuration.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Try exact match first, then case-insensitive match
+                let target = undefined;
+                if (Object.prototype.hasOwnProperty.call(data, key)) {
+                    target = data[key];
+                } else {
+                    const lowerKey = key.toLowerCase();
+                    for (const k of Object.keys(data)) {
+                        if (k.toLowerCase() === lowerKey) {
+                            target = data[k];
+                            break;
+                        }
+                    }
+                }
+
+                if (!target || typeof target !== 'string') {
+                    setStatus('No matching site found.', 'error');
+                    return;
+                }
+
+                setStatus('Redirecting...', 'loading');
+
+                // Redirect immediately. Use location.replace to avoid creating a history entry.
+                try {
+                    window.location.replace(target);
+                } catch (e) {
+                    window.location.href = target;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                setStatus('Error while loading configuration.', 'error');
+            });
+    })();
+    </script>
 </body>
 </html>
